@@ -1,6 +1,5 @@
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
-from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.utils.dates import days_ago
 from datetime import timedelta
 
@@ -12,9 +11,6 @@ default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
     'start_date': days_ago(1),
-    'email': ['airflow@airflow.com'],
-    'email_on_failure': False,
-    'email_on_retry': False,
     'retries': 1
 }
 
@@ -22,7 +18,7 @@ with DAG(
     'coincap_parser',
     default_args=default_args,
     description='Parse Coinmarketcap to get rates',
-    schedule_interval=timedelta(minutes=30)
+    schedule_interval='@once'
 ) as dag:
 
     parse_coincap = PythonOperator(
