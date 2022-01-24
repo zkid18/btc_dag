@@ -18,7 +18,7 @@ with DAG(
     'coincap_parser',
     default_args=default_args,
     description='Parse Coinmarketcap to get rates',
-    schedule_interval='@once'
+    schedule_interval=timedelta(minutes=30)
 ) as dag:
 
     parse_coincap = PythonOperator(

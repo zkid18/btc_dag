@@ -2,6 +2,8 @@ import requests
 import psycopg2
 
 from airflow.hooks.postgres_hook import PostgresHook
+from airflow.exceptions import AirflowFailException
+
 from datetime import datetime, timezone
 
 
@@ -24,11 +26,16 @@ def load_data(asst_id, symbol, curr_symbol, asst_type, rate_usd, ts):
     cursor = conn.cursor()
 
     dt_object = datetime.now(timezone.utc)
-    vars = (asst_id, symbol, curr_symbol, asst_type, rate_usd, dt_object)
+    vars = (asst_id, symbol, asst_type, rate_usd, dt_object)
     print(vars)
-    query = "INSERT INTO coincap_rates.btc(asst_id, symbol, currencysymbol, type, rateusd, date_created) VALUES(%s,%s,%s,%s,%s,%s) RETURNING asst_id"
+
+    query = "INSERT INTO coincap_rates.btc(asst_id, currencysymbol, type, rateusd, date_created) VALUES(%s,%s,%s,%s,%s) RETURNING asst_id"
     try:
         cursor.execute(query, vars)
+        conn.commit()
+        id_of_new_row = cursor.fetchone()[0]
+        print(id_of_new_row)
+
     except Exception as err:
         conn.rollback()
         raise AirflowFailException("Failed executing the query {} with  error {}".format(query, err))
